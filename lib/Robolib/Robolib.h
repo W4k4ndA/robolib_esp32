@@ -9,7 +9,8 @@
 //Interfaces
 #include "src/Interfaces/IDriverDistanceSensor.h"
 #include "src/Interfaces/IDriverHBMotor.h"
-#include "src/Interfaces/IDriverLineSensor.h"
+#include "src/Interfaces/IDriverDigitalLineSensor.h"
+#include "src/Interfaces/IDriverAnalogLineSensor.h"
 
 
 //Servicios

@@ -6,6 +6,8 @@
 #include "Interfaces/IRobotModule.h"
 #include "Services/DistanceService.h"
 #include "Services/HBridgeMotorService.h"
+#include "Services/AnalogLineSensorService.h"
+#include "Services/DigitalLineSensorService.h"
 
 namespace robolib
 {
@@ -68,8 +70,10 @@ namespace robolib
 
     public:
         /// Aqui se agregan los servicios para que el robot tenga acceso a sus modulos
-        DistanceService distance{modules};
-        HBridgeMotorService motors{modules};
+        DistanceService distanceSensor{modules};
+        HBridgeMotorService dcMotor{modules};
+        AnalogLineSensorService analogLineSensor{modules};
+        DigitalLineSensorService digitalLineSensor{modules};
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.

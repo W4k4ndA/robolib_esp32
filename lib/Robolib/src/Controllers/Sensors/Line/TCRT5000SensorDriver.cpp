@@ -5,48 +5,45 @@ namespace robolib
 {
     TCRT5000SensorDriver::TCRT5000SensorDriver(uint8_t pin, bool sensorType) : sensorPin(pin), isDigital(sensorType) {}
 
-    void TCRT5000SensorDriver::begin()
+    void TCRT5000SensorDriver::init()
     {
+        IRobotModule::init();
         pinMode(sensorPin, INPUT);
     }
 
-    void TCRT5000SensorDriver::set1IsonLine()
+    void TCRT5000SensorDriver::update()
     {
-        is1onLine = true;
+        IRobotModule::update();
     }
 
-    void TCRT5000SensorDriver::set0IsonLine()
+    void TCRT5000SensorDriver::set1IsOnLine(bool value)
     {
-        is1onLine = false;
+        is1onLine = value;
     }
 
-    int TCRT5000SensorDriver::getAnalogRawValue()
+    int TCRT5000SensorDriver::getAnalogLine()
     {
         return analogRead(sensorPin);
     }
 
-    bool TCRT5000SensorDriver::isOnLine()
+    bool TCRT5000SensorDriver::getLine()
     {
-        if (isDigital)
+        if (is1onLine == digitalRead(sensorPin))
         {
-            if (is1onLine == digitalRead(sensorPin))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
-
         else
         {
-            return analogRead(sensorPin) >= threshold; // Umbral para sensor analógico
+            return false;
         }
     }
 
     void TCRT5000SensorDriver::setThreshold(int value)
     {
         threshold = value;
+    }
+
+    bool TCRT5000SensorDriver::getIsOnLine(){
+        return analogRead(sensorPin) >= threshold;
     }
 }

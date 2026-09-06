@@ -1,4 +1,5 @@
--Actualiziar la clase robotBuilder en robot.h para incluir el vector de
-sensores de linea en el proceso de construccion.
-
--Actualiziar el archivo robot.cpp para incluir el modulo de sensor de linea
+- Crear la interfaz para el control por bluetooth BLE para la libreria
+- Crear la clase concreta DriverBLE que implemente la interfaz de control de bluetooth
+- Crear el servicio de control por BLE
+- Incluir el servicio de BLE en los servicios disponibles de la clase robot (Robot.h)
+- Actualizar los includes con el nuevo servicio y la nueva in

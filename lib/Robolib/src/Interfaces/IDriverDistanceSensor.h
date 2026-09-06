@@ -2,8 +2,6 @@
 #define I_DRIVER_DISTANCE_SENSOR_H
 
 #include "IRobotModule.h"
-#include <cstdint>
-
 /**
  * @file IDriverDistanceSensor.h
  * @brief Interfaz abstracta para sensores de distancia.
