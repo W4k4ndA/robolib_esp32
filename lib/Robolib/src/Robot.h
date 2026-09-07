@@ -68,12 +68,27 @@ namespace robolib
         Robot(const Robot &) = delete;
         Robot &operator=(const Robot &) = delete;
 
-    public:
-        /// Aqui se agregan los servicios para que el robot tenga acceso a sus modulos
+        // Servicios como miembros (acceso directo con .)
         DistanceService distanceSensor{modules};
         HBridgeMotorService dcMotor{modules};
         AnalogLineSensorService analogLineSensor{modules};
         DigitalLineSensorService digitalLineSensor{modules};
+
+
+    public:
+        
+        /// Getters para sintaxis con -> (punteros a servicios)
+        DistanceService* distance() { return &distanceSensor; }
+        // const DistanceService* distance() const { return &distanceSensor; }
+
+        HBridgeMotorService* motors() { return &dcMotor; }
+        // const HBridgeMotorService* motors() const { return &dcMotor; }
+
+        AnalogLineSensorService* analogLine() { return &analogLineSensor; }
+        // const AnalogLineSensorService* analogLine() const { return &analogLineSensor; }
+
+        DigitalLineSensorService* digitalLine() { return &digitalLineSensor; }
+        // const DigitalLineSensorService* digitalLine() const { return &digitalLineSensor; }
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.

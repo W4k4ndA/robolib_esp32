@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cstddef>
-#include "Interfaces/IRobotModule.h"
+#include "../Interfaces/IRobotModule.h"
 
 namespace robolib {
 
@@ -24,9 +24,8 @@ public:
     T* getModule(size_t index = 0) const {
         size_t count = 0;
         for (auto* module : modules) {
-            T* casted = dynamic_cast<T*>(module);
-            if (casted) {
-                if (count == index) return casted;
+            if (module->getType() == T::staticType()) {
+                if (count == index) return static_cast<T*>(module);
                 count++;
             }
         }
@@ -40,7 +39,7 @@ public:
     size_t countModules() const {
         size_t count = 0;
         for (auto* module : modules) {
-            if (dynamic_cast<T*>(module) != nullptr) {
+            if (module->getType() == T::staticType()) {
                 count++;
             }
         }

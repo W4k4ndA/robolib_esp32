@@ -1,8 +1,7 @@
 #ifndef TCRT5000_SENSOR_DRIVER_H
 #define TCRT5000_SENSOR_DRIVER_H
 
-#include "Interfaces/IDriverDigitalLineSensor.h"
-#include "Interfaces/IDriverAnalogLineSensor.h"
+#include "../../../Interfaces/IDriverDigitalLineSensor.h"
 #include <cstdint>
 
 namespace robolib
@@ -30,13 +29,11 @@ namespace robolib
      * @see IDriverLineSensor
      * @ingroup drivers
      */
-    class TCRT5000SensorDriver : virtual public IDriverDigitalLineSensor, virtual public IDriverAnalogLineSensor
+    class TCRT5kDigitalDriver :  public IDriverDigitalLineSensor
     {
     private:
         uint8_t sensorPin;      ///< Pin GPIO/ADC conectado a la salida del sensor
-        bool isDigital;         ///< true = modo digital (GPIO), false = modo analógico (ADC)
         bool is1onLine = false; ///< Estado interno: true si el sensor retorna 1 al leer linea, false si no
-        int threshold;          ///< Umbral para modo analógico (0-4095 en ESP32)
 
     public:
         /**
@@ -51,14 +48,14 @@ namespace robolib
          * @note El pin debe ser válido para ADC si isDigital=false.
          *       No configura hardware; llamar a begin() después.
          */
-        TCRT5000SensorDriver(uint8_t pin);
+        TCRT5kDigitalDriver(uint8_t pin);
 
         /**
          * @brief Destructor por defecto.
          *
          * No libera recursos de hardware (pines GPIO/ADC son gestionados por framework Arduino).
          */
-        ~TCRT5000SensorDriver() = default;
+        ~TCRT5kDigitalDriver() override = default;
 
         /**
          * @brief Inicializa el hardware del sensor.
@@ -99,40 +96,7 @@ namespace robolib
          */
         void set1IsOnLine(bool value = true) override;
 
-        /**
-         * @brief Obtiene el valor analógico crudo del sensor.
-         *
-         * En modo analógico: retorna lectura ADC (0-4095 en ESP32 12-bit).
-         * En modo digital: retorna 0 (línea detectada) o 4095 (sin línea) para compatibilidad.
-         *
-         * @return Valor de reflectancia:
-         *         - Valores bajos (~0-1000) = superficie oscura / línea detectada
-         *         - Valores altos (~3000-4095) = superficie clara / sin línea
-         *         - En modo digital: 0 o 4095
-         *
-         * @note Función no bloqueante, lectura inmediata.
-         */
-        int getAnalogLine() override;
 
-        /**
-         * @brief Establece el umbral de detección para modo analógico.
-         *
-         * @param value Umbral ADC (0-4095). Valores por debajo = línea detectada.
-         *              Típico: 1500-2500 según calibración y superficie.
-         *
-         * @note Solo afecta al modo analógico (isDigital=false).
-         *       En modo digital, el umbral lo fija el potenciómetro del módulo TCRT5000.
-         *
-         * @see getAnalogValue() para calibrar observando valores en línea/fuera de línea.
-         */
-        void setThreshold(int value) override;
-
-        /**
-         * @brief Obtiene el estado digital del sensor de línea analogico.
-         *
-         * @return true si el valor del sensor esta por encima del umbral (threshold) y false si no
-         */
-        bool getIsOnLine() override;
     };
 
 }

@@ -4,7 +4,7 @@
 #include "Helper.h"
 #include <cstdint>
 #include <vector>
-#include "Interfaces/IDriverAnalogLineSensor.h"
+#include "../Interfaces/IDriverAnalogLineSensor.h"
 
 namespace robolib
 {
@@ -12,7 +12,6 @@ namespace robolib
     {
     public:
         using ModuleHelper::ModuleHelper;
-
 
         uint16_t isOnLine(size_t index = 0) const
         {
@@ -27,16 +26,19 @@ namespace robolib
 
         bool exists() const { return count() > 0; }
 
-
-        void setThreshold(size_t index = 0, uint16_t value){
+        void updateThreshold(size_t index = 0, int value = 800)
+        {
             auto *sensor = getModule<IDriverAnalogLineSensor>(index);
 
-            if(sensor) sensor->setThreshold(value);
+            if (sensor)
+                sensor->setThreshold(value);
         }
 
-        bool getIsOnLine(size_t index = 0){
+        bool isLine(size_t index = 0)
+        {
             auto *sensor = getModule<IDriverAnalogLineSensor>(index);
-            if(sensor) return sensor->getIsOnLine();
+            if (sensor)
+                return sensor->isOnLine();
             return false;
         }
     };

@@ -1,7 +1,7 @@
 #ifndef HCSR04_SENSOR_DRIVER_H
 #define HCSR04_SENSOR_DRIVER_H
 
-#include "Interfaces/IDriverDistanceSensor.h"
+#include "../../../Interfaces/IDriverDistanceSensor.h"
 #include <cstdint>
 
 namespace robolib {

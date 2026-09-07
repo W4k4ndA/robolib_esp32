@@ -2,15 +2,19 @@
 #include <Robolib.h>
 using namespace robolib;
 
-Robot *r;
+auto robot = RobotBuilder()
+        .addModule(new HCSR04SensorDriver(1, 2))
+        .addModule(new HBridgeMotorDriver(3, 4, 5, 6))
+        .build();
 
 void setup()
 {
-    r = RobotBuilder()
-            .addModule(new TCRT5000SensorDriver(2))
-            .build();
+    robot->begin();
 }
 
 void loop()
 {
-}
+
+    robot->distance()->getCM();
+    robot->digitalLine()->exists();
+}   

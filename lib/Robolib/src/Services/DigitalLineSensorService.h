@@ -4,7 +4,7 @@
 #include "Helper.h"
 #include <cstdint>
 #include <vector>
-#include "Interfaces/IDriverDigitalLineSensor.h"
+#include "../Interfaces/IDriverDigitalLineSensor.h"
 
 namespace robolib
 {

@@ -39,6 +39,16 @@ public:
      */
     virtual ~IDriverDistanceSensor() = default;
 
+
+    /**
+     * @brief Obtiene el tipo de módulo.
+     *
+     * @return ModuleType::DistanceSensor
+     */
+    static constexpr ModuleType staticType() { return ModuleType::DistanceSensor; }
+    ModuleType getType() const override { return staticType(); }
+
+
     /**
      * @brief Realiza una medición de distancia única en cm.
      * 

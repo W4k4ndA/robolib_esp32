@@ -15,7 +15,7 @@
 namespace robolib
 {
 
-    class IDriverDigitalLineSensor : virtual public IRobotModule
+    class IDriverDigitalLineSensor : public IRobotModule
     {
 
     private:
@@ -26,6 +26,15 @@ namespace robolib
          * @brief Destructor virtual por defecto.
          */
         virtual ~IDriverDigitalLineSensor() = default;
+
+        /**
+         * @brief Obtiene el tipo de módulo.
+         *
+         * @return ModuleType::DigitalLineSensor
+         */
+        static constexpr ModuleType staticType() { return ModuleType::DigitalLineSensor; }
+        ModuleType getType() const override { return staticType(); }
+
 
         /**
          * @brief Obtiene el estado del sensor de línea digital.

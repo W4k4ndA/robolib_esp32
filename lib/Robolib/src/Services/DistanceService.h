@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <cstddef>
-#include "Interfaces/IRobotModule.h"
-#include "Interfaces/IDriverDistanceSensor.h"
-#include "Services/Helper.h"
+#include "../Interfaces/IRobotModule.h"
+#include "../Interfaces/IDriverDistanceSensor.h"
+#include "Helper.h"
 
 namespace robolib
 {

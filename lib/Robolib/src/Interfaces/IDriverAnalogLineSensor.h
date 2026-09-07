@@ -15,7 +15,7 @@
 
 namespace robolib
 {
-  class IDriverAnalogLineSensor : virtual public IRobotModule
+  class IDriverAnalogLineSensor :  public IRobotModule
   {
   private:
     bool threshold;
@@ -25,6 +25,14 @@ namespace robolib
      * @brief Destructor virtual para limpieza adecuada de clases derivadas.
      */
     virtual ~IDriverAnalogLineSensor() = default;
+
+    /**
+     * @brief Obtiene el tipo de módulo.
+     *
+     * @return ModuleType::AnalogLineSensor
+     */
+    static constexpr ModuleType staticType() { return ModuleType::AnalogLineSensor; }
+    ModuleType getType() const override { return staticType(); }
 
     /**
      * @brief Obtiene el valor analógico crudo del sensor de línea.
@@ -48,7 +56,7 @@ namespace robolib
      *
      * @return true si el valor del sensor esta por encima del umbral (threshold) y false si no
      */
-    virtual bool getIsOnLine() = 0;
+    virtual bool isOnLine() = 0;
   };
 }
 

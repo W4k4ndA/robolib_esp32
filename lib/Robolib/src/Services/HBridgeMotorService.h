@@ -2,8 +2,8 @@
 #define H_BRIDGE_MOTOR_SERVICE_H
 
 #include <stdint.h>
-#include "Interfaces/IDriverHBMotor.h"
-#include "Services/Helper.h"
+#include "../Interfaces/IDriverHBMotor.h"
+#include "Helper.h"
 
 namespace robolib
 {
