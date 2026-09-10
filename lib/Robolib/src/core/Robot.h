@@ -11,6 +11,7 @@
 
 namespace robolib
 {
+    using UserCallback = void (*)();
     // Forward declaration
     class RobotBuilder;
 
@@ -58,6 +59,7 @@ namespace robolib
     class Robot
     {
     private:
+        UserCallback userLoopCallback = nullptr;
         std::vector<IRobotModule *> modules; ///< lista de modulos del robot (incluye
                                              /// todos los drivers)(owner>
 
@@ -84,7 +86,6 @@ namespace robolib
         DistanceService *distanceSensor = &distanceService;
         // const DistanceService* distance() const { return &distanceSensor; }
 
-
         /**
          * @brief Acceso a servicios de motores DC.
          * Permite acceder al driver o drivers puente H instalados en el robot
@@ -92,14 +93,12 @@ namespace robolib
         HBridgeMotorService *motorDC = &dcMotorService;
         // const HBridgeMotorService* motors() const { return &dcMotor; }
 
-
         /**
          * @brief Acceso a servicios de sensores de linea analogicos
          * Permite acceder al driver o drivers de sensores de linea analogicos instalados en el robot
          */
         AnalogLineSensorService *analogLineSensor = &analogLineService;
         // const AnalogLineSensorService* analogLine() const { return &analogLineSensor; }
-
 
         /**
          * @brief Acceso a servicios de sensores de linea digitales
@@ -124,6 +123,12 @@ namespace robolib
         void begin();
 
         void update();
+
+        // Registra la función externa
+        void attachFunc(UserCallback callback);
+
+        //Método exclusivo para ejecutar la función del estudiante
+        void run();
     };
 
     //----------------CLASE ROBOT BUILDER-----------------------------------------------------

@@ -49,6 +49,19 @@ namespace robolib
                 m->update();
         }
     }
+
+    void Robot::attachFunc(UserCallback callback)
+    {
+        userLoopCallback = callback;
+    }
+
+    void Robot::run()
+    {
+        if (userLoopCallback)
+        {
+            userLoopCallback();
+        }
+    }
  
     // =========================================================
     // ROBOT BUILDER
