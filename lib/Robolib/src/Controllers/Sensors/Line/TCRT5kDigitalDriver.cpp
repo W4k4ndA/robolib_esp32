@@ -27,13 +27,6 @@ namespace robolib
         pinMode(sensorPin, INPUT);
     }
 
-    /**
-     * @brief Actualización periódica (vacía - no requiere polling continuo).
-     */
-    void TCRT5kDigitalDriver::update()
-    {
-        // No requiere implementación - implementación por defecto vacía en IRobotModule
-    }
 
     /**
      * @brief Configura la lógica de detección.
