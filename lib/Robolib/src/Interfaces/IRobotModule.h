@@ -58,14 +58,14 @@ namespace robolib
          * y dejar el dispositivo en estado listo para operar.
          *
          * @post Módulo completamente inicializado y listo para recibir comandos.
-         * @note Se llama exactamente una vez durante Robot::begin() o RobotBuilder::build().
+         * @note Se llama exactamente una vez durante Robot::begin()
          */
         virtual void init() = 0;
 
         /**
-         * @brief Actualización periódica del módulo (opcional).
+         * @brief Actualización periódica de los módulos (opcional).
          *
-         * Se llama en cada iteración de Robot::update() o Robot::run().
+         * Se llama en cada iteración de Robot::update().
          * Útil para: filtrado de señales, PID, máquinas de estado, lecturas continuas.
          *
          * @note Implementación por defecto vacía. Sobrescribir solo si necesario.

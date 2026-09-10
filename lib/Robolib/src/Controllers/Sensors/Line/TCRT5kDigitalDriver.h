@@ -60,10 +60,7 @@ namespace robolib
          */
         void init() override;
 
-        /**
-         * @brief Actualización periódica (opcional, implementación vacía).
-         */
-        void update() override;
+
 
         /**
          * @brief Verifica si el sensor está actualmente sobre una línea.

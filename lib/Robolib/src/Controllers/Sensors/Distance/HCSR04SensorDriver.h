@@ -94,7 +94,7 @@ public:
     void init() override;
 
     /**
-     * @brief Realiza medición de distancia por ultrasónidos.
+     * @brief Realiza medición de distancia por ultrasonidos.
      * 
      * Secuencia:
      * 1. Pulso LOW 2 µs en Trig (estabilización)

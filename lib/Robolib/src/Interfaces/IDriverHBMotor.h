@@ -52,9 +52,7 @@ namespace robolib
         static constexpr ModuleType staticType() { return ModuleType::DCMotor; }
         ModuleType getType() const override { return staticType(); }
 
-        // init() se hereda como virtual puro desde IRobotModule.
-        // Las clases concretas (L298N, TB6612) lo implementarán.
-
+      
         /**
          * @brief Establece la velocidad y dirección del motor.
          *
@@ -71,7 +69,7 @@ namespace robolib
         /**
          * @brief Detiene el motor.
          *
-         * @param stacked Modo de frenado:
+         * @param breaked Modo de frenado:
          *                - false (default): freno libre (coasting), duty = 0 en ambos canales
          *                - true: freno activo (brake), duty = 255 en ambos canales (cortocircuito en puente H)
          *
