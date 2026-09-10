@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Robolib.h>
+
 using namespace robolib;
 
 auto robot = RobotBuilder()
@@ -15,6 +16,5 @@ void setup()
 void loop()
 {
 
-    robot->distance()->getCM();
-    robot->digitalLine()->exists();
+    robot->distanceSensor->getCM();
 }   

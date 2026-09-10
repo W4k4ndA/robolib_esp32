@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include "Interfaces/IRobotModule.h"
-#include "Services/DistanceService.h"
-#include "Services/HBridgeMotorService.h"
-#include "Services/AnalogLineSensorService.h"
-#include "Services/DigitalLineSensorService.h"
+#include "../Interfaces/IRobotModule.h"
+#include "../Services/DistanceService.h"
+#include "../Services/HBridgeMotorService.h"
+#include "../Services/AnalogLineSensorService.h"
+#include "../Services/DigitalLineSensorService.h"
 
 namespace robolib
 {
@@ -69,25 +69,43 @@ namespace robolib
         Robot &operator=(const Robot &) = delete;
 
         // Servicios como miembros (acceso directo con .)
-        DistanceService distanceSensor{modules};
-        HBridgeMotorService dcMotor{modules};
-        AnalogLineSensorService analogLineSensor{modules};
-        DigitalLineSensorService digitalLineSensor{modules};
-
+        // Instancias reales de los servicios (privadas)
+        DistanceService distanceService{modules};
+        HBridgeMotorService dcMotorService{modules};
+        AnalogLineSensorService analogLineService{modules};
+        DigitalLineSensorService digitalLineService{modules};
 
     public:
-        
         /// Getters para sintaxis con -> (punteros a servicios)
-        DistanceService* distance() { return &distanceSensor; }
+        /**
+         * @brief Acceso a servicios de distancia.
+         * Permite acceder al sensor o sensores de distancia instalados en el robot
+         */
+        DistanceService *distanceSensor = &distanceService;
         // const DistanceService* distance() const { return &distanceSensor; }
 
-        HBridgeMotorService* motors() { return &dcMotor; }
+
+        /**
+         * @brief Acceso a servicios de motores DC.
+         * Permite acceder al driver o drivers puente H instalados en el robot
+         */
+        HBridgeMotorService *motorDC = &dcMotorService;
         // const HBridgeMotorService* motors() const { return &dcMotor; }
 
-        AnalogLineSensorService* analogLine() { return &analogLineSensor; }
+
+        /**
+         * @brief Acceso a servicios de sensores de linea analogicos
+         * Permite acceder al driver o drivers de sensores de linea analogicos instalados en el robot
+         */
+        AnalogLineSensorService *analogLineSensor = &analogLineService;
         // const AnalogLineSensorService* analogLine() const { return &analogLineSensor; }
 
-        DigitalLineSensorService* digitalLine() { return &digitalLineSensor; }
+
+        /**
+         * @brief Acceso a servicios de sensores de linea digitales
+         * Permite acceder al driver o drivers de sensores de linea digitales instalados en el robot
+         */
+        DigitalLineSensorService *digitalLineSensor = &digitalLineService;
         // const DigitalLineSensorService* digitalLine() const { return &digitalLineSensor; }
 
         /**
