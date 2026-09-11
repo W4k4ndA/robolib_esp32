@@ -19,6 +19,7 @@
 #include "../Services/HBridgeMotorService.h"
 #include "../Services/AnalogLineSensorService.h"
 #include "../Services/DigitalLineSensorService.h"
+#include "../Services/LedService.h"
 
 namespace robolib
 {
@@ -82,6 +83,7 @@ namespace robolib
         HBridgeMotorService dcMotorService{modules};
         AnalogLineSensorService analogLineService{modules};
         DigitalLineSensorService digitalLineService{modules};
+        LEDService ledService{modules};
 
         // Constructor privado. Solo RobotBuilder puede construir
         Robot() = default;
@@ -119,6 +121,13 @@ namespace robolib
          * Retorna nullptr si no hay sensores registrados.
          */
         DigitalLineSensorService *digitalLineSensor = &digitalLineService;
+
+
+        /** @brief Acceso a servicios de leds.
+         * Permite encender, apagar y cambiar intensidad de leds.
+         * Retorna nullptr si no hay leds registrados.
+         */
+        LEDService *led = &ledService;
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.

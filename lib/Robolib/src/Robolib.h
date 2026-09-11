@@ -22,5 +22,6 @@
 #include "Controllers/Sensors/Distance/HCSR04SensorDriver.h"
 #include "Controllers/Sensors/Line/TCRT5kDigitalDriver.h"
 #include "Controllers/Sensors/Line/TCRT5kAnalogDriver.h"
+#include "Controllers/Actuators/LED/LedDriver.h"
 
 #endif

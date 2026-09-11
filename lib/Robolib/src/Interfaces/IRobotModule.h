@@ -29,7 +29,8 @@ namespace robolib
         DCMotor,            ///< Motor DC con puente H
         DistanceSensor,     ///< Sensor de distancia (ultrasónico, ToF, etc.)
         DigitalLineSensor,  ///< Sensor de línea digital (GPIO)
-        AnalogLineSensor    ///< Sensor de línea analógico (ADC)
+        AnalogLineSensor,    ///< Sensor de línea analógico (ADC)
+        LED                 /// < Controlador de LEDs
     };
 
     /**
