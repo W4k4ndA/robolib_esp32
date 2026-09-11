@@ -41,11 +41,11 @@ namespace robolib
          * @param index Índice del LED a ajustar. Por defecto es 0.
          * @param intensity Intensidad del LED (0-255).
          */
-        void ledBrigth(size_t index = 0, uint8_t intensity)
+        void ledBrigth(size_t index = 0, uint8_t brigthness = 0)
         {
             auto *ledDriver = getModule<IDriverLed>(index);
             if (ledDriver)
-                ledDriver->setLedIntensity(intensity);
+                ledDriver->setLedIntensity(brigthness);
         }
 
         /**

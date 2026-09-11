@@ -20,6 +20,7 @@
 #include "../Services/AnalogLineSensorService.h"
 #include "../Services/DigitalLineSensorService.h"
 #include "../Services/LedService.h"
+#include "../Services/PassiveBuzzerService.h"
 
 namespace robolib
 {
@@ -84,6 +85,7 @@ namespace robolib
         AnalogLineSensorService analogLineService{modules};
         DigitalLineSensorService digitalLineService{modules};
         LEDService ledService{modules};
+        PassiveBuzzerService buzzerService{modules};
 
         // Constructor privado. Solo RobotBuilder puede construir
         Robot() = default;
@@ -128,6 +130,12 @@ namespace robolib
          * Retorna nullptr si no hay leds registrados.
          */
         LEDService *led = &ledService;
+
+        /** @brief Acceso a servicios de zumbador pasivo.
+         * Permite generar sonidos con el zumbador pasivo.
+         * Retorna nullptr si no hay zumbadores registrados.
+         */
+        PassiveBuzzerService *buzzer = &buzzerService;
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.
