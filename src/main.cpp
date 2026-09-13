@@ -3,7 +3,6 @@
 
 using namespace robolib;
 
-
 /**
  * @brief Ejemplo completo de uso de Robolib.
  *
@@ -16,7 +15,15 @@ using namespace robolib;
 // Instancia global del robot
 Robot *robot = nullptr;
 
-void studentLoop();
+// Callback del estudiante (si lo desea)
+void studentLoop()
+{
+    // Ejemplo: Leer distancia y mostrar por serial
+    float distance = robot->distanceSensor->getCM();
+    Serial.print(F("Distancia: "));
+    Serial.print(distance);
+    Serial.println(F(" cm"));
+}
 
 void setup()
 {
@@ -36,19 +43,19 @@ void setup()
                 .addModule(new TCRT5kDigitalDriver(4))
                 // LED indicador: GPIO 13
                 .addModule(new LedDriver(13))
-
+                // Completar construcción
                 .build();
 
     // 2. Inicializar TODO el hardware (pines, PWM, ADC, etc.)
     robot->begin();
-    
+
     // 3. Registrar callback del estudiante
     robot->attachFunc(studentLoop);
 
     // 4. Encender un led
     robot->led->ledON();
 
-    Serial.println("Robolib inicializado - Robot listo");
+    Serial.println(F("Robolib inicializado - Robot listo"));
 }
 
 void loop()
@@ -60,36 +67,4 @@ void loop()
     delay(20);
 }
 
-
-
-void studentLoop()
-{
-    // === LÓGICA DEL ESTUDIANTE AQUÍ ===
-
-    // Leer sensor ultrasónico
-    float distancia = robot->distanceSensor->getCM(0);
-    if (distancia > 0 && distancia < 20.0f)
-    {
-        // Obstáculo cerca: parar
-        robot->motorDC->stopAll(true); // Freno activo
-        Serial.printf("Obstáculo a %.1f cm - PARADO\n", distancia);
-    }
-    else
-    {
-        // Avanzar
-        robot->motorDC->moveDifferential(150, 150);
-    }
-
-    // Leer sensor de línea
-    if (robot->digitalLineSensor->exists())
-    {
-        bool enLinea = robot->digitalLineSensor->isOnLine(0);
-        if (enLinea)
-        {
-            Serial.println("¡Línea detectada!");
-            // Lógica de seguimiento de línea aquí
-        }
-    }
-
-    // =================================
-}
+// Fin del programa
