@@ -14,7 +14,7 @@ namespace robolib
 
             using ModuleHelper::ModuleHelper;
             
-            void sound(size_t index = 0, uint16_t frequency)
+            void sound(size_t index = 0, uint16_t frequency=440)
             {
                 auto *buzzerDriver = getModule<IDriverPassiveBuzzer>(index);
                 if (buzzerDriver)

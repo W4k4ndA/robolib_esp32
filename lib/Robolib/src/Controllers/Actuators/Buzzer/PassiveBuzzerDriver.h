@@ -8,7 +8,7 @@
 namespace robolib
 {
 
-    class PassiveBuzzerDriver : public IDriverPasiveBuzzer
+    class PassiveBuzzerDriver : public IDriverPassiveBuzzer
     {
     private:
         uint8_t buzzerPin;
@@ -18,14 +18,13 @@ namespace robolib
          * @brief Destructor de la clase PasiveBuzzerDriver.
          */
         ~PassiveBuzzerDriver() override = default;
-        
+
         /**
          * @brief Constructor de la clase PasiveBuzzerDriver.
          *
          * @param pin Pin al que está conectado el zumbador pasivo.
          */
         PassiveBuzzerDriver(uint8_t pin);
-
 
         /**
          * @brief Inicializa el zumbador pasivo.
