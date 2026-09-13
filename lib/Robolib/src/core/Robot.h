@@ -76,8 +76,8 @@ namespace robolib
     class Robot
     {
     private:
-        UserCallback userLoopCallback = nullptr;           ///< Callback de loop del usuario
-        std::vector<IRobotModule *> modules;               ///< Lista de módulos (ownership)
+        UserCallback userLoopCallback = nullptr; ///< Callback de loop del usuario
+        std::vector<IRobotModule *> modules;     ///< Lista de módulos (ownership)
 
         // Servicios como miembros (acceso directo con .)
         DistanceService distanceService{modules};
@@ -88,7 +88,7 @@ namespace robolib
         PassiveBuzzerService buzzerService{modules};
 
         // Constructor privado. Solo RobotBuilder puede construir
-        Robot() = default;
+        Robot(std::vector<IRobotModule *> &&mods);
         friend class RobotBuilder;
 
         // No copiable (ownership exclusiva)
@@ -123,7 +123,6 @@ namespace robolib
          * Retorna nullptr si no hay sensores registrados.
          */
         DigitalLineSensorService *digitalLineSensor = &digitalLineService;
-
 
         /** @brief Acceso a servicios de leds.
          * Permite encender, apagar y cambiar intensidad de leds.

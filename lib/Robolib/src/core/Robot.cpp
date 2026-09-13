@@ -34,6 +34,8 @@ namespace robolib
         modules.clear();
     }
 
+    Robot::Robot(std::vector<IRobotModule *> &&mods) : modules(std::move(mods)) {}
+
     /**
      * @brief Inicializa todos los módulos del robot.
      *
@@ -144,26 +146,26 @@ namespace robolib
      */
     Robot *RobotBuilder::build()
     {
-        // 1. Instanciación del objeto Robot principal
-        Robot *robot = new Robot();
+        // // 1. Instanciación del objeto Robot principal
+        // Robot *robot = new Robot();
 
-        // 2. Inicialización y transferencia de módulos
-        for (auto *module : tempModules)
-        {
-            if (module)
-            {
-                // Inicializa el hardware del módulo (setup de pines, I2C, etc.)
-                module->init();
+        // // 2. Inicialización y transferencia de módulos
+        // for (auto *module : tempModules)
+        // {
+        //     if (module)
+        //     {
+        //         // // Inicializa el hardware del módulo (setup de pines, I2C, etc.)
+        //         // module->init();
 
-                // Pasa el control del módulo a la instancia final del Robot
-                robot->modules.push_back(module);
-            }
-        }
+        //         // Pasa el control del módulo a la instancia final del Robot
+        //         robot->modules.push_back(module);
+        //     }
+        // }
 
-        // 3. Limpia la lista temporal del builder por seguridad
-        tempModules.clear();
+        // // 3. Limpia la lista temporal del builder por seguridad
+        // tempModules.clear();
 
-        return robot;
+        return new Robot(std::move(tempModules));
     }
 
 } // namespace robolib
