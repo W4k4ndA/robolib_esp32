@@ -26,12 +26,13 @@ namespace robolib
      */
     enum class ModuleType
     {
-        DCMotor,            ///< Motor DC con puente H
-        DistanceSensor,     ///< Sensor de distancia (ultrasónico, ToF, etc.)
-        DigitalLineSensor,  ///< Sensor de línea digital (GPIO)
-        AnalogLineSensor,    ///< Sensor de línea analógico (ADC)
-        LED,                 /// < Controlador de LEDs
-        PassiveBuzzer       /// < Controlador de Buzzer pasivo
+        DCMotor,           ///< Motor DC con puente H
+        DistanceSensor,    ///< Sensor de distancia (ultrasónico, ToF, etc.)
+        DigitalLineSensor, ///< Sensor de línea digital (GPIO)
+        AnalogLineSensor,  ///< Sensor de línea analógico (ADC)
+        LED,               /// < Controlador de LEDs
+        PassiveBuzzer,     /// < Controlador de Buzzer pasivo
+        Button            /// < Controlador de Botones
     };
 
     /**
