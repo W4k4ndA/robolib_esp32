@@ -21,6 +21,7 @@
 #include "../Services/DigitalLineSensorService.h"
 #include "../Services/LedService.h"
 #include "../Services/PassiveBuzzerService.h"
+#include "../Services/ButtonService.h"
 
 namespace robolib
 {
@@ -86,6 +87,7 @@ namespace robolib
         DigitalLineSensorService digitalLineService{modules};
         LEDService ledService{modules};
         PassiveBuzzerService buzzerService{modules};
+        ButtonService buttonService{modules};
 
         // Constructor privado. Solo RobotBuilder puede construir
         Robot(std::vector<IRobotModule *> &&mods);
@@ -135,6 +137,8 @@ namespace robolib
          * Retorna nullptr si no hay zumbadores registrados.
          */
         PassiveBuzzerService *buzzer = &buzzerService;
+
+        ButtonService *button = &buttonService;
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.

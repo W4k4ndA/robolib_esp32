@@ -1,9 +1,9 @@
 Entradas Digitales
 -- Crear la interfaz IDriverButton para el control por entradas digitales para la libreria
-X Crear la clase concreta DriverButton que implemente la interfaz de control de entradas digitales
-X Crear el servicio de control por entradas digitales ButtonService
-X Incluir el servicio de entradas digitales en los servicios disponibles de la clase robot (Robot.h)
-X Actualizar los includes con el nuevo servicio y la nueva interfaz
+-- Crear la clase concreta DriverButton que implemente la interfaz de control de entradas digitales
+-- Crear el servicio de control por entradas digitales ButtonService
+-- Incluir el servicio de entradas digitales en los servicios disponibles de la clase robot (Robot.h)
+-- Actualizar los includes con el nuevo servicio y la nueva interfaz
 
 Entradas Analogicas
 X Crear la interfaz IDriverAnalog para el control por entradas analogicas para la libreria

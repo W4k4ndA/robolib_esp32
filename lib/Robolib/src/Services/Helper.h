@@ -12,7 +12,7 @@
  */
 
 #include <vector>
-#include <cstddef>
+#include <cstdint>
 #include "../Interfaces/IRobotModule.h"
 
 namespace robolib {

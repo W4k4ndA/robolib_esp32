@@ -23,5 +23,9 @@
 #include "Controllers/Sensors/Line/TCRT5kDigitalDriver.h"
 #include "Controllers/Sensors/Line/TCRT5kAnalogDriver.h"
 #include "Controllers/Actuators/LED/LedDriver.h"
+#include "Controllers/Actuators/Buzzer/PassiveBuzzerDriver.h"
+#include "Controllers/Sensors/Button/ButtonSensorDriver.h"
+
+// Servicios (incluidos transitivamente por los controladores)
 
 #endif

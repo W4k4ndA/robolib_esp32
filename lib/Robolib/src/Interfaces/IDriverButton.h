@@ -9,6 +9,7 @@ namespace robolib
 
     class IDriverButton : IRobotModule
     {
+        
     public:
         /**
          * @brief Destructor virtual por defecto.
@@ -24,7 +25,17 @@ namespace robolib
         static constexpr ModuleType staticType() { return ModuleType::Button; }
         ModuleType getType() const override { return staticType(); }
 
-        virtual bool readButton(uint8_t pin) = 0;
+        /**
+         * @brief Lee el estado del botón.
+         * @return true si el botón está presionado, false en caso contrario.
+         */
+        virtual bool readButton() = 0;
+
+        /**
+         * @brief Lee el estado anterior del botón.
+         * @return true si el botón estaba presionado, false en caso contrario.
+         */
+        virtual bool lastStateButton() const = 0;
     };
 
 }
