@@ -7,7 +7,7 @@
 namespace robolib
 {
 
-    class IDriverButton : IRobotModule
+    class IDriverButton : public IRobotModule
     {
         
     public:
