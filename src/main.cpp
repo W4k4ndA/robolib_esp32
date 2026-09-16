@@ -33,16 +33,21 @@ void setup()
 
     // 1. Construir robot con Builder Pattern
     robot = RobotBuilder()
-                // Motor izquierdo: IN1=3, IN2=4, CH1=5, CH2=6
-                .addModule(new HBridgeMotorDriver(3, 4, 5, 6))
-                // Motor derecho: IN1=7, IN2=8, CH1=9, CH2=10
-                .addModule(new HBridgeMotorDriver(7, 8, 9, 10))
+                // Motor izquierdo: IN1=3, IN2=4
+                .addModule(new HBridgeMotorDriver(3, 4))
+
+                // Motor derecho: IN1=7, IN2=8
+                .addModule(new HBridgeMotorDriver(7, 8))
+
                 // Sensor ultrasónico frontal: Trig=1, Echo=2
                 .addModule(new HCSR04SensorDriver(1, 2))
+
                 // Sensor línea digital (DO): GPIO 4
                 .addModule(new TCRT5kDigitalDriver(4))
+
                 // LED indicador: GPIO 13
                 .addModule(new LedDriver(13))
+                
                 // Completar construcción
                 .build();
 

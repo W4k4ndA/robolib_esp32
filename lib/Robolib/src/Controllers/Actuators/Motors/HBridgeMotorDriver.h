@@ -1,6 +1,7 @@
 #ifndef HBRIDGE_DRIVER_H
 #define HBRIDGE_DRIVER_H
 
+#include "../../../HAL/PWMchannelManager.h"
 #include "../../../Interfaces/IDriverHBMotor.h"
 
 namespace robolib
@@ -57,23 +58,25 @@ namespace robolib
         uint8_t CH2; ///< Canal LEDC para IN2 (0-15)
 
         static constexpr uint32_t PWM_FREQ = 25000; ///< Frecuencia PWM: 25 kHz (inaudible, buena para motores)
-        static constexpr uint8_t PWM_RES = 8;       ///< Resolución PWM: 8 bits (0-255)
+        uint8_t PWM_RES = 8;                        ///< Resolución PWM: 8 bits (0-255)
+
+        bool availableChannels = false; 
+
 
     public:
         /**
          * @brief Constructor.
          * Driver para motores DC con puente H (L298N, TB6612, L9110, etc.).
          *
-         * @param pinIN1 Pin GPIO conectado a IN1 del puente H 
-         * @param pinIN2 Pin GPIO conectado a IN2 del puente H 
-         * @param ch1    Canal LEDC (0-15) para pinIN1
-         * @param ch2    Canal LEDC (0-15) para pinIN2
+         * @param pinIN1 Pin GPIO conectado a IN1 del puente H
+         * @param pinIN2 Pin GPIO conectado a IN2 del puente H
          *
-         * @note Los canales deben ser distintos y no usados por otros drivers.
+         * @note Los canales son asignados automaticamente por driver procurando
+         *  ser distintos y no usados por otros drivers.
          *       El ESP32-C3 tiene 6 canales (0-5), ESP32 clásico tiene 16 (0-15).
          * @note No inicializa hardware; llamar a begin() después.
          */
-        HBridgeMotorDriver(uint8_t pinIN1, uint8_t pinIN2, uint8_t ch1, uint8_t ch2);
+        HBridgeMotorDriver(uint8_t pinIN1, uint8_t pinIN2);
 
         /**
          * @brief Destructor.
@@ -107,7 +110,7 @@ namespace robolib
          * - speed < 0: CH1 = 0, CH2 = |speed| (reversa)
          * - speed = 0: stop() -> freno libre
          */
-        void move(int16_t speed) override;
+        void move(uint32_t speed) override;
 
         /**
          * @brief Detiene el motor.
@@ -119,7 +122,7 @@ namespace robolib
          * @note Freno activo (stacked=true) cortocircuita el motor en el puente H,
          *       deteniéndolo más rápido pero consumiendo corriente de mantenimiento.
          */
-        void stop(bool stacked = false) override;
+        void stop(bool breaked = false) override;
     };
 
 } // namespace robolib

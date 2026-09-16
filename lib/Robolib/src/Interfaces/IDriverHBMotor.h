@@ -64,7 +64,7 @@ namespace robolib
          * @note La implementación debe saturar valores fuera de rango a [-255, 255].
          * @note No bloquea; el cambio de velocidad es inmediato.
          */
-        virtual void move(int16_t speed) = 0;
+        virtual void move(uint32_t speed) = 0;
 
         /**
          * @brief Detiene el motor.
