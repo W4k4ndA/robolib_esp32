@@ -57,9 +57,10 @@ namespace robolib
         uint8_t CH1; ///< Canal LEDC para IN1 (0-15)
         uint8_t CH2; ///< Canal LEDC para IN2 (0-15)
 
-        static constexpr uint32_t PWM_FREQ = 25000; ///< Frecuencia PWM: 25 kHz (inaudible, buena para motores)
-        uint8_t PWM_RES = 8;                        ///< Resolución PWM: 8 bits (0-255)
+        static constexpr uint32_t PWM_FREQ = 20000; ///< Frecuencia PWM: 25 kHz (inaudible, buena para motores)
+        static constexpr uint8_t PWM_RES = 10;                        ///< Resolución PWM: 8 bits (0-255)
 
+     
         bool availableChannels = false; 
 
 
@@ -110,7 +111,7 @@ namespace robolib
          * - speed < 0: CH1 = 0, CH2 = |speed| (reversa)
          * - speed = 0: stop() -> freno libre
          */
-        void move(uint32_t speed) override;
+        void move(int16_t speed) override;
 
         /**
          * @brief Detiene el motor.

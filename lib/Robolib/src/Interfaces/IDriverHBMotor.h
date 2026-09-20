@@ -56,15 +56,15 @@ namespace robolib
         /**
          * @brief Establece la velocidad y dirección del motor.
          *
-         * @param speed Velocidad objetivo (-255 a 255).
+         * @param speed Velocidad objetivo (depende de la resolucion del canal PWM)
          *              - >0: adelante con duty cycle = speed
          *              - <0: reversa con duty cycle = |speed|
          *              - 0:  detenido (ver stop())
          *
-         * @note La implementación debe saturar valores fuera de rango a [-255, 255].
+         * @note La implementación debe saturar valores fuera de rango al maximo de la resolucion.
          * @note No bloquea; el cambio de velocidad es inmediato.
          */
-        virtual void move(uint32_t speed) = 0;
+        virtual void move(int16_t speed) = 0;
 
         /**
          * @brief Detiene el motor.

@@ -31,7 +31,6 @@ namespace robolib
 
         availableChannels = (CH1 != -1 && CH2 != -1);
 
-
         if (availableChannels)
         {
             // Configurar canales LEDC: frecuencia 25 kHz, resolución 8 bits
@@ -43,7 +42,7 @@ namespace robolib
             ledcAttachPin(IN2, CH2);
 
             // Estado inicial: motor detenido (freno libre)
-            stop(false);
+            HBridgeMotorDriver::stop(false);
         }
         else
         {
@@ -52,90 +51,58 @@ namespace robolib
         }
     }
 
-    void HBridgeMotorDriver::move(uint32_t speed)
+    void HBridgeMotorDriver::move(int16_t speed)
     {
-        // Saturar a rango PWM válido [-255, 255]-[-1023, 1023]-[-4095, 4095]
-        switch (PWM_RES)
+        if (!availableChannels)
+            return; // Salir si no hay canales disponibles
+
+        // obtenemos el valor maximo dinamicamente segun PWM_RES
+        int16_t maxDuty = (1 << PWM_RES) - 1;
+
+        // Restringimos el valor de speed a los valores maximos y minimos de la resolucion de PWM
+        speed = constrain(speed, -maxDuty, maxDuty);
+
+        uint16_t absSpeed = abs(speed);
+
+        if (speed > 0)
         {
-        case 8:
-            speed = constrain(speed, -255, 255);
-            break;
-
-        case 10:
-            speed = constrain(speed, -1023, 1023);
-            break;
-
-        case 12:
-            speed = constrain(speed, -4095, 4095);
-            break;
-
-        default:
-            break;
+            // Adelante: CH1 = PWM, CH2 = 0
+            ledcWrite(CH1, absSpeed);
+            ledcWrite(CH2, 0);
         }
-
-        if (availableChannels)
+        else if (speed < 0)
         {
-            if (speed > 0)
-            {
-                // Adelante: CH1 = PWM, CH2 = 0
-                ledcWrite(CH1, speed);
-                ledcWrite(CH2, 0);
-            }
-            else if (speed < 0)
-            {
-                // Reversa: CH1 = 0, CH2 = |PWM|
-                ledcWrite(CH1, 0);
-                ledcWrite(CH2, speed);
-            }
-            else
-            {
-                // Cero: detener con freno libre
-                stop(false);
-            }
+            // Reversa: CH1 = 0, CH2 = |PWM|
+            ledcWrite(CH1, 0);
+            ledcWrite(CH2, absSpeed);
+        }
+        else
+        {
+            // Cero: detener con freno libre
+            HBridgeMotorDriver::stop(false);
         }
     }
 
     void HBridgeMotorDriver::stop(bool breaked)
     {
-        // Freno activo (brake): ambos canales a 255 -> cortocircuito en puente H
+
+        if (!availableChannels)
+            return;
+        // Freno activo (brake): ambos canales a MAX -> cortocircuito en puente H
         // Detiene el motor rápidamente pero consume corriente de mantenimiento
-        if (availableChannels)
+        
+        if (breaked)
         {
-            if (breaked)
-            {
-                switch (PWM_RES)
-                {
-                case 8:
-
-                    ledcWrite(CH1, 255);
-                    ledcWrite(CH2, 255);
-                    break;
-
-                case 10:
-
-                    ledcWrite(CH1, 1023);
-                    ledcWrite(CH2, 1023);
-                    break;
-
-                case 12:
-
-                    ledcWrite(CH1, 4095);
-                    ledcWrite(CH2, 4095);
-                    break;
-
-                default:
-                    break;
-                }
-
-                ledcWrite(CH1, 255);
-                ledcWrite(CH2, 255);
-            }
-            else
-            {
-                // Freno libre (coasting): ambos canales a 0 -> motor gira libre
-                ledcWrite(CH1, 0);
-                ledcWrite(CH2, 0);
-            }
+           // Freno activo: Ambos canales al máximo ciclo de trabajo permitido por PWM_RES
+            uint32_t maxDuty = (1 << PWM_RES) - 1;
+            ledcWrite(CH1, maxDuty);
+            ledcWrite(CH2, maxDuty);
+        }
+        else
+        {
+            // Freno libre (coasting): ambos canales a 0 -> motor gira libre
+            ledcWrite(CH1, 0);
+            ledcWrite(CH2, 0);
         }
     }
 

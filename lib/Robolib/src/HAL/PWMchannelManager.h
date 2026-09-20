@@ -13,11 +13,11 @@
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 // ESP32-S2 y S3 tienen 8 canales LEDC (0 a 7)
-#define MAX_LEDC_CHANNELS 8
+#define MAX_PWM_CHANNELS 8
 
 #else
 // ESP32 Clásico (Dual Core) posee 16 canales LEDC (0 a 15)
-#define MAX_LEDC_CHANNELS 16
+#define MAX_PWM_CHANNELS 16
 #endif
 
 namespace robolib
@@ -44,7 +44,7 @@ namespace robolib
          */
         static int8_t getChannel()
         {
-            for (uint8_t ch; ch < MAX_PWM_CHANNELS; ch++)
+            for (uint8_t ch = 0; ch < MAX_PWM_CHANNELS; ch++)
             {
                 // Se verifica si es cierto (true) que el bit correspondiente al canal está libre (0)
                 if (!(channelMap & (1 << ch)))
@@ -68,9 +68,6 @@ namespace robolib
             }
         }
     };
-
-    // Inicialización del mapa de bits
-    inline uint16_t PWMChannelManager::channelMap = 0;
 
 }
 
