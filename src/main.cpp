@@ -34,19 +34,19 @@ void setup()
     // 1. Construir robot con Builder Pattern
     robot = RobotBuilder()
                 // Motor izquierdo: IN1=3, IN2=4
-                .addModule(new HBridgeMotorDriver(3, 4))
+                .addModule(new HBridgeMotorDriver(4, 3))
 
                 // Motor derecho: IN1=7, IN2=8
-                .addModule(new HBridgeMotorDriver(7, 8))
+                .addModule(new HBridgeMotorDriver(6, 5))
 
                 // Sensor ultrasónico frontal: Trig=1, Echo=2
-                .addModule(new HCSR04SensorDriver(1, 2))
+                .addModule(new HCSR04SensorDriver(1, 0))
 
                 // Sensor línea digital (DO): GPIO 4
-                .addModule(new TCRT5kDigitalDriver(4))
+                // .addModule(new TCRT5kDigitalDriver(4))
 
                 // LED indicador: GPIO 13
-                .addModule(new LedDriver(13))
+                .addModule(new LedDriver(8))
                 
                 // Completar construcción
                 .build();
@@ -66,10 +66,14 @@ void setup()
 void loop()
 {
     // Ejecutar callback registrado (loop del estudiante)
-    robot->run();
+    // robot->run();
+
+    Serial.printf("Distancia: %.1f cm\n", robot->distanceSensor->getCM());
+    robot->led->ledToggle();
+    robot->motorDC->moveDifferential(800, 800);
 
     // Pequeño delay para no saturar CPU
-    delay(20);
+    delay(1000);
 }
 
 // Fin del programa
