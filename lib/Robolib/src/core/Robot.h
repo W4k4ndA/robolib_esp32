@@ -22,6 +22,7 @@
 #include "../Services/LedService.h"
 #include "../Services/PassiveBuzzerService.h"
 #include "../Services/ButtonService.h"
+#include "../Services/IMUService.h"
 
 namespace robolib
 {
@@ -60,18 +61,22 @@ namespace robolib
      *     .addModule(new HBridgeMotorDriver(19, 21, 2, 3))  // Motor derecho
      *     .addModule(new HCSR04SensorDriver(4, 16))         // Sensor frontal
      *     .addModule(new TCRT5kDigitalDriver(2))            // Sensor línea
+     *     .addModule(new MPU6050Driver(21, 22))             // IMU (SDA=21, SCL=22)
      *     .build();
      *
      * robot->begin();
      * robot->attachFunc([]() {
      *     // Loop del estudiante
      *     float dist = robot->distanceSensor->getCM(0);
+     *     IMUData imu = robot->imu->read();
+     *     float roll = robot->imu->getRoll(imu);
+     *     float pitch = robot->imu->getPitch(imu);
      *     robot->motorDC->moveDifferential(100, 100);
      * });
      * while (true) robot->run();
      * @endcode
      *
-     * @see RobotBuilder, IDriverHBMotor, IDriverDistanceSensor
+     * @see RobotBuilder, IDriverHBMotor, IDriverDistanceSensor, IDriverIMU
      * @ingroup core
      */
     class Robot
@@ -88,6 +93,7 @@ namespace robolib
         LEDService ledService{modules};
         PassiveBuzzerService buzzerService{modules};
         ButtonService buttonService{modules};
+        IMUService imuService{modules};
 
         // Constructor privado. Solo RobotBuilder puede construir
         Robot(std::vector<IRobotModule *> &&mods);
@@ -137,6 +143,12 @@ namespace robolib
          * Retorna nullptr si no hay zumbadores registrados.
          */
         PassiveBuzzerService *buzzer = &buzzerService;
+
+        /** @brief Acceso a servicios de IMU (MPU6050, etc.).
+         * Permite leer aceleración, giroscopio, orientación.
+         * Retorna nullptr si no hay IMU registrada.
+         */
+        IMUService *imu = &imuService;
 
         ButtonService *button = &buttonService;
 

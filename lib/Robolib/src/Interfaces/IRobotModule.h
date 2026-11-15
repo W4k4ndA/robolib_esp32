@@ -32,7 +32,8 @@ namespace robolib
         AnalogLineSensor,  ///< Sensor de línea analógico (ADC)
         LED,               /// < Controlador de LEDs
         PassiveBuzzer,     /// < Controlador de Buzzer pasivo
-        Button            /// < Controlador de Botones
+        Button,            /// < Controlador de Botones
+        IMU                /// < Unidad de Medición Inercial (MPU6050, etc.)
     };
 
     /**
