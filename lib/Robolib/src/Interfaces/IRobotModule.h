@@ -30,10 +30,10 @@ namespace robolib
         DistanceSensor,    ///< Sensor de distancia (ultrasónico, ToF, etc.)
         DigitalLineSensor, ///< Sensor de línea digital (GPIO)
         AnalogLineSensor,  ///< Sensor de línea analógico (ADC)
-        LED,               /// < Controlador de LEDs
-        PassiveBuzzer,     /// < Controlador de Buzzer pasivo
-        Button,            /// < Controlador de Botones
-        IMU                /// < Unidad de Medición Inercial (MPU6050, etc.)
+        LED,               ///< Controlador de LEDs
+        PassiveBuzzer,     ///< Controlador de Buzzer pasivo
+        Button,            ///< Controlador de Botones
+        IMUSensor          ///< Sensor IMU (acelerómetro + giroscopio)
     };
 
     /**

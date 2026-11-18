@@ -25,6 +25,7 @@
 #include "Controllers/Actuators/LED/LedDriver.h"
 #include "Controllers/Actuators/Buzzer/PassiveBuzzerDriver.h"
 #include "Controllers/Sensors/Button/ButtonSensorDriver.h"
+#include "Controllers/Sensors/IMU/MPU6050Driver.h"
 
 // Servicios (incluidos transitivamente por los controladores)
 

@@ -61,22 +61,18 @@ namespace robolib
      *     .addModule(new HBridgeMotorDriver(19, 21, 2, 3))  // Motor derecho
      *     .addModule(new HCSR04SensorDriver(4, 16))         // Sensor frontal
      *     .addModule(new TCRT5kDigitalDriver(2))            // Sensor línea
-     *     .addModule(new MPU6050Driver(21, 22))             // IMU (SDA=21, SCL=22)
      *     .build();
      *
      * robot->begin();
      * robot->attachFunc([]() {
      *     // Loop del estudiante
      *     float dist = robot->distanceSensor->getCM(0);
-     *     IMUData imu = robot->imu->read();
-     *     float roll = robot->imu->getRoll(imu);
-     *     float pitch = robot->imu->getPitch(imu);
      *     robot->motorDC->moveDifferential(100, 100);
      * });
      * while (true) robot->run();
      * @endcode
      *
-     * @see RobotBuilder, IDriverHBMotor, IDriverDistanceSensor, IDriverIMU
+     * @see RobotBuilder, IDriverHBMotor, IDriverDistanceSensor
      * @ingroup core
      */
     class Robot
@@ -144,13 +140,14 @@ namespace robolib
          */
         PassiveBuzzerService *buzzer = &buzzerService;
 
-        /** @brief Acceso a servicios de IMU (MPU6050, etc.).
-         * Permite leer aceleración, giroscopio, orientación.
-         * Retorna nullptr si no hay IMU registrada.
+        ButtonService *button = &buttonService;
+
+        /**
+         * @brief Acceso a servicios de sensores IMU.
+         * Permite leer aceleración, giroscopio y temperatura.
+         * Retorna nullptr si no hay sensores IMU registrados.
          */
         IMUService *imu = &imuService;
-
-        ButtonService *button = &buttonService;
 
         /**
          * @brief Destructor: libera todos los drivers inyectados.

@@ -3,212 +3,259 @@
 
 /**
  * @file MPU6050Driver.h
- * @brief Driver para IMU MPU6050 (acelerómetro + giroscopio 6-DOF).
+ * @brief Driver para sensor IMU MPU6050 sobre I2C.
  *
- * Implementa IDriverIMU usando comunicación I2C.
- * Soporta rangos configurables, calibración de offsets, auto-test y modo sueño.
+ * Implementa IDriverIMUSensor para el MPU6050 (6 ejes: 3 acelerómetro + 3 giroscopio).
+ * El MPU6050 también incluye un sensor de temperatura interno.
  *
- * Especificaciones MPU6050:
- * - Acelerómetro: 3 ejes, ±2g/±4g/±8g/±16g, 16-bit ADC
- * - Giroscopio: 3 ejes, ±250/±500/±1000/±2000 °/s, 16-bit ADC
- * - Temperatura: integrado, -40 a +85 °C
- * - I2C: hasta 400 kHz (Fast Mode), dirección 0x68 (AD0=GND) o 0x69 (AD0=VCC)
- * - DMP: Digital Motion Processor (no implementado en este driver)
+ * Especificaciones típicas:
+ * - Voltaje: 3.3V (tolerante a 5V en VCC, pero lógica I2C a 3.3V)
+ * - Interfaz: I2C (dirección 0x68 o 0x69 si AD0 = HIGH)
+ * - Acelerómetro: rangos configurables ±2g, ±4g, ±8g, ±16g
+ * - Giroscopio: rangos configurables ±250, ±500, ±1000, ±2000 °/s
+ * - ADC: 16 bits por eje
+ * - Temperatura interna: -40°C a +85°C
  *
- * Conexión típica ESP32:
+ * Conexión típica ESP32 (I2C):
  * - VCC -> 3.3V
  * - GND -> GND
- * - SDA -> GPIO 21 (default I2C0)
- * - SCL -> GPIO 22 (default I2C0)
- * - AD0 -> GND (addr 0x68) o 3.3V (addr 0x69)
- * - INT -> GPIO opcional (interrupción data ready)
+ * - SDA -> GPIO SDA del ESP32 (ej. 21)
+ * - SCL -> GPIO SCL del ESP32 (ej. 22)
+ * - INT -> (opcional) GPIO para interrupciones
+ * - AD0 -> GND (dirección 0x68) o VCC (dirección 0x69)
  *
- * @warning MPU6050 trabaja a 3.3V. No conectar directamente a 5V.
- * @note Para DMP (fusión de sensores), usar librería externa (ej. I2Cdevlib).
- *
- * Ejemplo de uso:
- * @code
- * MPU6050Driver imu(21, 22);  // SDA, SCL
- * imu.init();
- * imu.setAccelRange(AccelRange::RANGE_4G);
- * imu.setGyroRange(GyroRange::RANGE_500DPS);
- * imu.calibrateGyro(500);  // Robot QUIETO
- *
- * IMUData data = imu.read();
- * float roll  = atan2(data.accelY, data.accelZ) * 180 / PI;
- * float pitch = atan2(-data.accelX, sqrt(data.accelY*data.accelY + data.accelZ*data.accelZ)) * 180 / PI;
- * @endcode
- *
- * @see IDriverIMU
  * @ingroup drivers
  */
 
-#include "../../../Interfaces/IDriverIMU.h"
+#include "../../../Interfaces/IDriverIMUSensor.h"
+#include <Arduino.h>
 #include <Wire.h>
 
 namespace robolib
 {
 
     /**
-     * @class MPU6050Driver
-     * @brief Driver para sensor MPU6050 via I2C.
+     * @brief Driver para sensor IMU MPU6050.
+     *
+     * Gestiona la comunicación I2C con el MPU6050 y entrega los datos ya
+     * convertidos a unidades físicas (g, °/s, °C).
+     *
+     * Ejemplo de uso:
+     * @code
+     * MPU6050Driver imu(0x68, 21, 22);  // addr, SDA, SCL
+     * imu.init();
+     * float ax, ay, az, gx, gy, gz, temp;
+     * if (imu.readAll(ax, ay, az, gx, gy, gz, temp)) {
+     *     Serial.printf("Temp: %.1f C\n", temp);
+     * }
+     * @endcode
+     *
+     * @see IDriverIMUSensor
+     * @ingroup drivers
      */
-    class MPU6050Driver : public IDriverIMU
+    class MPU6050Driver : public IDriverIMUSensor
     {
     private:
-        // Configuración I2C
-        TwoWire &wire;           ///< Bus I2C (Wire o Wire1)
-        uint8_t i2cAddr;         ///< Dirección I2C (0x68 o 0x69)
-        uint8_t sdaPin;          ///< Pin SDA (para begin personalizado)
-        uint8_t sclPin;          ///< Pin SCL (para begin personalizado)
-        uint32_t i2cFreq;        ///< Frecuencia I2C (default 400 kHz)
+        uint8_t address;  ///< Dirección I2C del MPU6050 (0x68 o 0x69)
+        int sdaPin;       ///< Pin GPIO SDA del bus I2C
+        int sclPin;       ///< Pin GPIO SCL del bus I2C
+        bool initialized; ///< Indica si init() se llamó correctamente
 
-        // Rangos configurados
-        AccelRange accelRange = AccelRange::RANGE_4G;
-        GyroRange gyroRange = GyroRange::RANGE_500DPS;
+        // Rangos configurables (por defecto ±2g y ±250 °/s)
+        uint8_t accelRange; ///< Rango acelerómetro (0=±2g, 1=±4g, 2=±8g, 3=±16g)
+        uint8_t gyroRange;  ///< Rango giroscopio (0=±250, 1=±500, 2=±1000, 3=±2000 °/s)
 
-        // Factores de escala (se actualizan con setAccelRange/setGyroRange)
-        float accelScale = 8192.0f;   ///< LSB/g para ±4g
-        float gyroScale = 65.5f;      ///< LSB/(°/s) para ±500°/s
+        // Ángulos de orientación (grados)
+        float roll;   ///< Ángulo de alabeo (°)
+        float pitch;  ///< Ángulo de cabeceo (°)
+        float yaw;    ///< Ángulo de guiñada (°)
 
-        // Offsets de calibración
-        int16_t accelOffsetX = 0;
-        int16_t accelOffsetY = 0;
-        int16_t accelOffsetZ = 0;
-        int16_t gyroOffsetX = 0;
-        int16_t gyroOffsetY = 0;
-        int16_t gyroOffsetZ = 0;
+        // Timestamp para integración del giroscopio
+        unsigned long lastTime; ///< Última lectura en milisegundos
 
-        bool calibrated = false;     ///< Flag de calibración completada
-        bool initialized = false;    ///< Flag de init() llamado
+        // Factor de fusión complementaria (0.0 = solo giro, 1.0 = solo accel)
+        static constexpr float ALPHA = 0.98f;
 
-        // Registros MPU6050
-        static constexpr uint8_t REG_WHO_AM_I     = 0x75;
-        static constexpr uint8_t REG_PWR_MGMT_1   = 0x6B;
-        static constexpr uint8_t REG_PWR_MGMT_2   = 0x6C;
-        static constexpr uint8_t REG_CONFIG       = 0x1A;
-        static constexpr uint8_t REG_GYRO_CONFIG  = 0x1B;
-        static constexpr uint8_t REG_ACCEL_CONFIG = 0x1C;
-        static constexpr uint8_t REG_ACCEL_XOUT_H = 0x3B;
-        static constexpr uint8_t REG_TEMP_OUT_H   = 0x41;
-        static constexpr uint8_t REG_GYRO_XOUT_H  = 0x43;
-        static constexpr uint8_t REG_SIGNAL_PATH  = 0x68;
-        static constexpr uint8_t REG_USER_CTRL    = 0x6A;
-        static constexpr uint8_t REG_FIFO_EN      = 0x23;
-        static constexpr uint8_t REG_I2C_MST_CTRL = 0x24;
+        // Factores de escala según el rango seleccionado
+        static constexpr float ACCEL_SCALE[4] = {16384.0f, 8192.0f, 4096.0f, 2048.0f}; ///< LSB/g según rango
+        static constexpr float GYRO_SCALE[4] = {131.0f, 65.5f, 32.8f, 16.4f};         ///< LSB/(°/s) según rango
 
-        // Valores WHO_AM_I esperados
-        static constexpr uint8_t WHO_AM_I_MPU6050 = 0x68;
+        // Direcciones de registro MPU6050
+        static constexpr uint8_t REG_SMPLRT_DIV = 0x19; ///< Divisor de frecuencia de muestreo
+        static constexpr uint8_t REG_CONFIG = 0x1A;     ///< Configuración filtro digital
+        static constexpr uint8_t REG_GYRO_CONFIG = 0x1B; ///< Configuración giroscopio
+        static constexpr uint8_t REG_ACCEL_CONFIG = 0x1C; ///< Configuración acelerómetro
+        static constexpr uint8_t REG_PWR_MGMT_1 = 0x6B; ///< Gestión de energía 1
+        static constexpr uint8_t REG_PWR_MGMT_2 = 0x6C; ///< Gestión de energía 2
+        static constexpr uint8_t REG_ACCEL_XOUT_H = 0x3B; ///< Acelerómetro X alto
+        static constexpr uint8_t REG_TEMP_OUT_H = 0x41;   ///< Temperatura alto
+        static constexpr uint8_t REG_GYRO_XOUT_H = 0x43;  ///< Giroscopio X alto
+        static constexpr uint8_t REG_WHO_AM_I = 0x75;     ///< Quién soy (identificación)
 
-        // Helpers I2C
-        bool writeRegister(uint8_t reg, uint8_t value);
-        bool readRegister(uint8_t reg, uint8_t &value);
-        bool readRegisters(uint8_t reg, uint8_t *buffer, size_t len);
-        int16_t readInt16(uint8_t regHigh);
+        // Constantes de temperatura
+        static constexpr float TEMP_OFFSET = 36.53f;    ///< Offset temperatura (°C)
+        static constexpr float TEMP_SCALE = 340.0f;     ///< Escala temperatura (°C/LSB)
 
-        // Conversión raw -> unidades físicas
-        float convertAccel(int16_t raw) const;
-        float convertGyro(int16_t raw) const;
-        float convertTemp(int16_t raw) const;
+        /**
+         * @brief Escribe un byte en un registro del MPU6050.
+         * @param reg Registro destino.
+         * @param data Valor a escribir.
+         * @return true si la escritura fue exitosa.
+         */
+        bool writeReg(uint8_t reg, uint8_t data);
 
-        // Actualizar factores de escala según rango
-        void updateScales();
+        /**
+         * @brief Lee un byte de un registro del MPU6050.
+         * @param reg Registro origen.
+         * @param data Referencia donde se almacena el valor leído.
+         * @return true si la lectura fue exitosa.
+         */
+        bool readReg(uint8_t reg, uint8_t &data);
+
+        /**
+         * @brief Lee múltiples bytes consecutivos desde un registro inicial.
+         * @param reg Registro inicial.
+         * @param buffer Buffer destino.
+         * @param length Cantidad de bytes a leer.
+         * @return true si la lectura fue exitosa.
+         */
+        bool readRegs(uint8_t reg, uint8_t *buffer, uint8_t length);
 
     public:
         /**
-         * @brief Constructor con bus I2C por defecto (Wire).
+         * @brief Constructor.
          *
-         * @param sda Pin SDA (default: 21 - I2C0 default ESP32).
-         * @param scl Pin SCL (default: 22 - I2C0 default ESP32).
-         * @param addr Dirección I2C (default: 0x68 con AD0=GND).
-         * @param freq Frecuencia I2C en Hz (default: 400000 = 400 kHz).
+         * @param address Dirección I2C del MPU6050 (0x68 por defecto, 0x69 si AD0 = HIGH).
+         * @param sdaPin  Pin GPIO SDA del bus I2C (por defecto 21 en ESP32).
+         * @param sclPin  Pin GPIO SCL del bus I2C (por defecto 22 en ESP32).
          *
-         * @note No inicializa hardware; llamar a init() después.
+         * @note No inicializa el hardware; llamar a init() después.
          */
-        MPU6050Driver(uint8_t sda = 21, uint8_t scl = 22, uint8_t addr = 0x68, uint32_t freq = 400000);
-
-        /**
-         * @brief Constructor con bus I2C personalizado (ej. Wire1 en ESP32).
-         *
-         * @param wireRef Referencia al bus TwoWire (Wire, Wire1, etc.).
-         * @param sda Pin SDA.
-         * @param scl Pin SCL.
-         * @param addr Dirección I2C (default: 0x68).
-         * @param freq Frecuencia I2C en Hz (default: 400000).
-         */
-        MPU6050Driver(TwoWire &wireRef, uint8_t sda, uint8_t scl, uint8_t addr = 0x68, uint32_t freq = 400000);
+        MPU6050Driver(uint8_t address = 0x68, int sdaPin = 21, int sclPin = 22);
 
         /**
          * @brief Destructor.
          */
         ~MPU6050Driver() override = default;
 
-        // --- IRobotModule ---
+        /**
+         * @brief Inicializa el bus I2C y configura el MPU6050.
+         *
+         * Configura:
+         * - Pines SDA/SCL del bus Wire.
+         * - Rango acelerómetro ±2g (por defecto).
+         * - Rango giroscopio ±250 °/s (por defecto).
+         * - Frecuencia de muestreo 100 Hz.
+         * - Filtro digital bajo (DLPF).
+         * - Modo activo (sale del sleep).
+         *
+         * @post Sensor listo para leer con readAcceleration/readGyroscope/readAll.
+         * @note Si el sensor no responde en I2C, init() retorna void pero `initialized`
+         *       queda en false y las lecturas fallarán hasta reiniciar.
+         */
         void init() override;
-        void update() override;
-
-        // --- IDriverIMU ---
-        void setAccelRange(AccelRange range) override;
-        void setGyroRange(GyroRange range) override;
-        AccelRange getAccelRange() const override { return accelRange; }
-        GyroRange getGyroRange() const override { return gyroRange; }
-
-        IMUData read() override;
-        IMURawData readRaw() override;
-
-        bool selfTest() override;
-        bool calibrateGyro(uint16_t samples = 200) override;
-        bool calibrateAccel(uint16_t samples = 100) override;
-
-        bool isConnected() const override;
-        uint8_t getDeviceID() const override;
-
-        void sleep() override;
-        void wakeUp() override;
 
         /**
-         * @brief Verifica si el driver está inicializado.
-         * @return true si init() se completó exitosamente.
+         * @brief Lee la aceleración en los tres ejes.
+         *
+         * @param ax Referencia donde se almacena aceleración eje X (g).
+         * @param ay Referencia donde se almacena aceleración eje Y (g).
+         * @param az Referencia donde se almacena aceleración eje Z (g).
+         * @return true si la lectura fue exitosa, false en caso de error de comunicación.
          */
-        bool isInitialized() const { return initialized; }
+        bool readAcceleration(float &ax, float &ay, float &az) override;
 
         /**
-         * @brief Verifica si hay calibración válida aplicada.
-         * @return true si calibrateGyro() o calibrateAccel() tuvo éxito.
+         * @brief Lee la velocidad angular (giroscopio) en los tres ejes.
+         *
+         * @param gx Referencia donde se almacena giro eje X (°/s).
+         * @param gy Referencia donde se almacena giro eje Y (°/s).
+         * @param gz Referencia donde se almacena giro eje Z (°/s).
+         * @return true si la lectura fue exitosa, false en caso de error de comunicación.
          */
-        bool isCalibrated() const { return calibrated; }
+        bool readGyroscope(float &gx, float &gy, float &gz) override;
 
         /**
-         * @brief Obtiene offsets de giroscopio actuales.
-         * @param x Offset eje X (LSB raw).
-         * @param y Offset eje Y (LSB raw).
-         * @param z Offset eje Z (LSB raw).
+         * @brief Lee la temperatura interna del sensor.
+         *
+         * @return Temperatura en grados Celsius, o NaN si hay error de lectura.
          */
-        void getGyroOffsets(int16_t &x, int16_t &y, int16_t &z) const
-        {
-            x = gyroOffsetX; y = gyroOffsetY; z = gyroOffsetZ;
-        }
+        float readTemperature() override;
 
         /**
-         * @brief Obtiene offsets de acelerómetro actuales.
-         * @param x Offset eje X (LSB raw).
-         * @param y Offset eje Y (LSB raw).
-         * @param z Offset eje Z (LSB raw).
+         * @brief Lee todos los datos (aceleración, giro y temperatura) en una sola operación.
+         *
+         * @param ax Referencia donde se almacena aceleración eje X (g).
+         * @param ay Referencia donde se almacena aceleración eje Y (g).
+         * @param az Referencia donde se almacena aceleración eje Z (g).
+         * @param gx Referencia donde se almacena giro eje X (°/s).
+         * @param gy Referencia donde se almacena giro eje Y (°/s).
+         * @param gz Referencia donde se almacena giro eje Z (°/s).
+         * @param temp Referencia donde se almacena temperatura (°C).
+         * @return true si la lectura fue exitosa, false en caso de error de comunicación.
          */
-        void getAccelOffsets(int16_t &x, int16_t &y, int16_t &z) const
-        {
-            x = accelOffsetX; y = accelOffsetY; z = accelOffsetZ;
-        }
+        bool readAll(float &ax, float &ay, float &az,
+                     float &gx, float &gy, float &gz,
+                     float &temp) override;
 
         /**
-         * @brief Establece offsets manualmente (ej. cargados de NVS/EEPROM).
-         * @param gx, gy, gz Offsets giroscopio (LSB raw).
-         * @param ax, ay, az Offsets acelerómetro (LSB raw).
+         * @brief Obtiene el ángulo de alabeo (roll) en grados.
+         *
+         * Roll: rotación alrededor del eje X (adelante-atrás).
+         * Calculado a partir del acelerómetro (no sufre deriva).
+         *
+         * @return Ángulo en grados (-180° a +180°).
          */
-        void setOffsets(int16_t gx, int16_t gy, int16_t gz,
-                        int16_t ax, int16_t ay, int16_t az);
+        float getRoll() override;
+
+        /**
+         * @brief Obtiene el ángulo de cabeceo (pitch) en grados.
+         *
+         * Pitch: rotación alrededor del eje Y (izquierda-derecha).
+         * Calculado a partir del acelerómetro (no sufre deriva).
+         *
+         * @return Ángulo en grados (-180° a +180°).
+         */
+        float getPitch() override;
+
+        /**
+         * @brief Obtiene el ángulo de guiñada (yaw) en grados.
+         *
+         * Yaw: rotación alrededor del eje Z (vertical).
+         * Calculado por integración del giroscopio con fusión complementaria.
+         * Sufrirá deriva gradual a menos que se añada un magnetómetro.
+         *
+         * @return Ángulo en grados (-180° a +180°).
+         */
+        float getYaw() override;
+
+        /**
+         * @brief Establece el rango del acelerómetro.
+         *
+         * @param range 0 = ±2g, 1 = ±4g, 2 = ±8g, 3 = ±16g.
+         */
+        void setAccelRange(uint8_t range);
+
+        /**
+         * @brief Establece el rango del giroscopio.
+         *
+         * @param range 0 = ±250 °/s, 1 = ±500 °/s, 2 = ±1000 °/s, 3 = ±2000 °/s.
+         */
+        void setGyroRange(uint8_t range);
+
+        /**
+         * @brief Obtiene el rango actual del acelerómetro.
+         * @return Rango configurado (0-3).
+         */
+        uint8_t getAccelRange() const { return accelRange; }
+
+        /**
+         * @brief Obtiene el rango actual del giroscopio.
+         * @return Rango configurado (0-3).
+         */
+        uint8_t getGyroRange() const { return gyroRange; }
     };
 
 } // namespace robolib
 
-#endif // MPU6050_DRIVER_H
+#endif
